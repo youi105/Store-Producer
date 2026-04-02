@@ -1,217 +1,123 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Advanced E-Commerce Store Generator</title>
+<title>Store Producer</title>
+
 <style>
-body{font-family:Arial;padding:20px;max-width:900px;margin:auto;background:#f0f8ff;color:#333;}
-input,textarea,select,button{width:100%;padding:8px;margin:5px 0;box-sizing:border-box;border-radius:5px;border:1px solid #ccc;}
-button{background:#28a745;color:#fff;border:none;cursor:pointer;transition:0.3s;}
-button:hover{background:#1e7e34;}
-.product-generator{border:1px solid #ccc;padding:10px;margin:10px 0;border-radius:8px;background:#e6f7ff;}
-.product-preview{display:inline-block;width:180px;text-align:center;margin:10px;cursor:pointer;border-radius:8px;background:#fff;padding:10px;box-shadow:0 2px 5px rgba(0,0,0,0.1);transition:0.2s;}
-.product-preview:hover{transform:translateY(-5px);box-shadow:0 5px 15px rgba(0,0,0,0.2);}
-.product-preview img{width:150px;height:150px;object-fit:cover;border-radius:5px;}
-.modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);justify-content:center;align-items:center;}
-.modal-content{background:#fff;padding:20px;border-radius:10px;width:90%;max-width:600px;text-align:left;position:relative;}
-.close{position:absolute;top:10px;right:15px;cursor:pointer;font-size:25px;color:#dc3545;}
-#reviews{border-top:1px solid #ccc;margin-top:10px;padding-top:10px;}
-textarea{width:100%;margin-top:5px;border:1px solid #28a745;border-radius:5px;}
+body{font-family:Arial;margin:0;background:#f4f8fb;}
+header{background:#007bff;color:white;padding:15px;text-align:center;}
+nav{display:flex;justify-content:space-between;padding:10px;background:#28a745;color:white;}
+button{padding:8px;border:none;border-radius:5px;cursor:pointer;}
+.product{border:1px solid #ccc;margin:10px;padding:10px;width:180px;display:inline-block;background:#fff;}
+.cart{position:fixed;right:10px;top:80px;background:#fff;padding:10px;border:1px solid #ccc;}
 </style>
 </head>
+
 <body>
 
-<h1 style="color:#007bff;">Advanced E-Commerce Store Generator</h1>
+<header>
+<h1>🛒 Store Producer</h1>
+</header>
 
-<h2>Store Settings</h2>
-<label>Store Name:</label>
-<input id="storeName" placeholder="My Online Store">
-<label>Store Description:</label>
-<input id="storeDesc" placeholder="Description of your store">
-<label>Seller Name:</label>
-<input id="sellerName" placeholder="Seller Name">
-<label>Seller Email:</label>
-<input id="sellerEmail" placeholder="Seller Email">
-<label>Upload Logo (optional):</label>
-<input type="file" id="logoInput" accept="image/*">
-<label>Theme:</label>
-<select id="themeSelect">
-  <option value="light">Light</option>
-  <option value="dark">Dark</option>
-</select>
+<nav>
+<div id="userArea">Not logged in</div>
+<button onclick="login()">Login</button>
+</nav>
 
-<h2>Products</h2>
-<div id="productsContainer"></div>
-<button onclick="addProduct()">Add Product</button>
+<h2 style="text-align:center;">Products</h2>
 
-<h2>Generate Store</h2>
-<button onclick="generateWebsite()">Generate Website</button>
+<div id="products"></div>
+
+<div class="cart">
+<h3>Cart</h3>
+<div id="cartItems"></div>
+<p>Total: $<span id="total">0</span></p>
+<button onclick="checkout()">Buy</button>
+</div>
+
+<hr>
+
+<h2 style="text-align:center;">AI Image Generator</h2>
+<input id="prompt" placeholder="Enter product idea">
+<button onclick="generateAI()">Generate</button>
+<div id="aiImages"></div>
 
 <script>
-let products = [];
-let logoBase64 = '';
 
-document.getElementById('logoInput').addEventListener('change', function(e){
-    const file = e.target.files[0];
-    if(!file) return;
-    const reader = new FileReader();
-    reader.onload = function(){ logoBase64 = reader.result.split(',')[1]; alert("Logo uploaded!"); };
-    reader.readAsDataURL(file);
+// PRODUCTS
+let products = [
+ {name:"Shoes",price:50,img:"https://via.placeholder.com/150"},
+ {name:"Watch",price:80,img:"https://via.placeholder.com/150"}
+];
+
+// DISPLAY PRODUCTS
+const container=document.getElementById("products");
+products.forEach((p,i)=>{
+ container.innerHTML+=`
+ <div class="product">
+  <img src="${p.img}">
+  <h3>${p.name}</h3>
+  <p>$${p.price}</p>
+  <button onclick="addToCart(${i})">Add to Cart</button>
+ </div>`;
 });
 
-function addProduct(){
-    const container = document.getElementById('productsContainer');
-    const index = products.length;
-    const div = document.createElement('div');
-    div.className = 'product-generator';
-    div.innerHTML = `
-      <label>Product Name:</label>
-      <input id="productName${index}" placeholder="Product Name">
-      <label>Price:</label>
-      <input id="productPrice${index}" placeholder="Price">
-      <label>Upload Main Image:</label>
-      <input type="file" id="productImage${index}">
-      <label>Extra Images (optional, comma separated URLs):</label>
-      <input id="productExtraImages${index}" placeholder="Extra Images">
-      <label>Category:</label>
-      <input id="productCategory${index}" placeholder="Category">
-      <label>Description:</label>
-      <textarea id="productDesc${index}" placeholder="Description"></textarea>
-      <label>Enable Reviews:</label>
-      <select id="productReviewsEnable${index}">
-        <option value="true">Yes</option>
-        <option value="false">No</option>
-      </select>
-    `;
-    container.appendChild(div);
-    products.push({});
+// LOGIN SYSTEM
+function login(){
+ let name=prompt("Enter your name:");
+ if(name){
+  localStorage.setItem("user",name);
+  document.getElementById("userArea").innerText="Welcome "+name;
+ }
 }
 
-async function generateWebsite(){
-    const storeName = document.getElementById('storeName').value || "My Online Store";
-    const storeDesc = document.getElementById('storeDesc').value || "Welcome!";
-    const sellerName = document.getElementById('sellerName').value || "Seller Name";
-    const sellerEmail = document.getElementById('sellerEmail').value || "seller@example.com";
-    const theme = document.getElementById('themeSelect').value;
-
-    let productHTML = '';
-    let productDataJS = [];
-
-    for(let i=0;i<products.length;i++){
-        const name = document.getElementById(`productName${i}`).value || `Product ${i+1}`;
-        const price = document.getElementById(`productPrice${i}`).value || "0";
-
-        // Convert uploaded main image to base64
-        const fileInput = document.getElementById(`productImage${i}`);
-        let mainImage = "https://via.placeholder.com/150"; // fallback
-        if(fileInput.files[0]){
-            mainImage = await new Promise(res=>{
-                const reader = new FileReader();
-                reader.onload = () => res(reader.result);
-                reader.readAsDataURL(fileInput.files[0]);
-            });
-        }
-
-        const extraImages = document.getElementById(`productExtraImages${i}`).value.split(',').map(s=>s.trim()).filter(s=>s);
-        const category = document.getElementById(`productCategory${i}`).value || "General";
-        const desc = document.getElementById(`productDesc${i}`).value || "";
-        const reviewsEnable = document.getElementById(`productReviewsEnable${i}`).value === 'true';
-
-        productHTML += `<div class="product-preview" onclick="openProduct(${i})">
-            <img src="${mainImage}">
-            <h3>${name}</h3>
-            <p style="color:#28a745;">$${price}</p>
-        </div>`;
-
-        productDataJS.push({name, price, mainImage, extraImages, category, desc, reviewsEnable, reviews:[]});
-    }
-
-    const htmlContent = `
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>${storeName}</title>
-<style>
-body{font-family:Arial;padding:20px;text-align:center;background:${theme==='dark'?'#222':'#f0f8ff'};color:${theme==='dark'?'#eee':'#333'};}
-.product-preview{border:1px solid #ccc;padding:10px;margin:10px;display:inline-block;width:180px;cursor:pointer;border-radius:8px;background:#fff;box-shadow:0 2px 5px rgba(0,0,0,0.1);transition:0.2s;}
-.product-preview:hover{transform:translateY(-5px);box-shadow:0 5px 15px rgba(0,0,0,0.2);}
-.product-preview img{width:150px;height:150px;object-fit:cover;border-radius:5px;}
-.modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);justify-content:center;align-items:center;}
-.modal-content{background:#fff;padding:20px;border-radius:10px;width:90%;max-width:600px;text-align:left;position:relative;}
-.close{position:absolute;top:10px;right:15px;cursor:pointer;font-size:25px;color:#dc3545;}
-#reviews{border-top:1px solid #ccc;margin-top:10px;padding-top:10px;}
-button{padding:8px 15px;margin-top:10px;background:#28a745;color:#fff;border:none;cursor:pointer;border-radius:5px;transition:0.3s;}
-button:hover{background:#1e7e34;}
-textarea{width:100%;margin-top:5px;border:1px solid #28a745;border-radius:5px;}
-</style>
-</head>
-<body>
-${logoBase64?`<img id="logo" src="data:image/png;base64,${logoBase64}" style="margin-bottom:20px;width:100px;">`:''}
-<h1 style="color:#007bff;">${storeName}</h1>
-<p>${storeDesc}</p>
-<div id="productsContainer">${productHTML}</div>
-
-<div id="productModal" class="modal">
-<div class="modal-content">
-<span class="close" onclick="closeModal()">&times;</span>
-<h2 id="modalName"></h2>
-<img id="modalImage" style="width:100%;max-height:250px;object-fit:cover;border-radius:5px;">
-<p id="modalPrice" style="color:#28a745;"></p>
-<p id="modalDesc"></p>
-<p><strong>Category:</strong> <span id="modalCategory"></span></p>
-<p><strong>Seller:</strong> ${sellerName} (${sellerEmail})</p>
-<div id="reviews"><strong>Reviews:</strong><div id="reviewsList"></div></div>
-<textarea id="newReview" placeholder="Add your review here"></textarea>
-<button id="buyBtn">Buy</button>
-<button onclick="addReview()">Add Review</button>
-</div>
-</div>
-
-<script>
-let products = ${JSON.stringify(productDataJS)};
-let currentProductIndex = null;
-
-function openProduct(index){
-    currentProductIndex=index;
-    const product=products[index];
-    document.getElementById('modalName').innerText=product.name;
-    document.getElementById('modalImage').src=product.mainImage;
-    document.getElementById('modalPrice').innerText='Price: $'+product.price;
-    document.getElementById('modalDesc').innerText=product.desc;
-    document.getElementById('modalCategory').innerText=product.category;
-    updateReviews();
-    document.getElementById('productModal').style.display='flex';
-    document.getElementById('buyBtn').onclick=function(){
-        const buyer=prompt("Enter your name:");
-        const email=prompt("Enter your email:");
-        if(buyer && email){
-            alert('Thank you '+buyer+'! You bought '+product.name+' for $'+product.price+'\\nSeller will contact you at ${sellerEmail}');
-        }
-    };
-    document.getElementById('newReview').style.display=product.reviewsEnable?'block':'none';
+// LOAD USER
+if(localStorage.getItem("user")){
+ document.getElementById("userArea").innerText="Welcome "+localStorage.getItem("user");
 }
 
-function closeModal(){document.getElementById('productModal').style.display='none';}
-
-function updateReviews(){
-    const product=products[currentProductIndex];
-    const reviewsDiv=document.getElementById('reviewsList');
-    reviewsDiv.innerHTML=product.reviews.length?product.reviews.map(r=>'- '+r).join('<br>'):'No reviews yet.';
+// CART
+let cart=[];
+function addToCart(i){
+ cart.push(products[i]);
+ updateCart();
 }
 
-function addReview(){
-    const product=products[currentProductIndex];
-    if(!product.reviewsEnable){alert('Reviews disabled for this product');return;}
-    const reviewText=document.getElementById('newReview').value.trim();
-    if(!reviewText){alert('Enter a review');return;}
-    product.reviews.push(reviewText);
-    document.getElementById('newReview').value='';
-    updateReviews();
+function updateCart(){
+ let items="";
+ let total=0;
+ cart.forEach(p=>{
+  items+=p.name+" - $"+p.price+"<br>";
+  total+=p.price;
+ });
+ document.getElementById("cartItems").innerHTML=items;
+ document.getElementById("total").innerText=total;
 }
+
+// CHECKOUT
+function checkout(){
+ let name=prompt("Enter your name:");
+ let email=prompt("Enter email:");
+ if(name && email){
+  alert("Order placed successfully!");
+  cart=[];
+  updateCart();
+ }
+}
+
+// AI GENERATOR
+function generateAI(){
+ let prompt=document.getElementById("prompt").value;
+ let div=document.getElementById("aiImages");
+ div.innerHTML="";
+ for(let i=0;i<3;i++){
+  div.innerHTML+=`<img src="https://via.placeholder.com/150?text=${prompt}">`;
+ }
+}
+
 </script>
+
 </body>
 </html>
