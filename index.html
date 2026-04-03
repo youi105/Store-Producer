@@ -1,216 +1,221 @@
-<!DOCTYPE html>
+    <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Advanced E-Commerce Store Generator</title>
+<title>Store Producer</title>
+
 <style>
-body{font-family:Arial;padding:20px;max-width:900px;margin:auto;background:#f0f8ff;color:#333;}
-input,textarea,select,button{width:100%;padding:8px;margin:5px 0;box-sizing:border-box;border-radius:5px;border:1px solid #ccc;}
-button{background:#28a745;color:#fff;border:none;cursor:pointer;transition:0.3s;}
-button:hover{background:#1e7e34;}
-.product-generator{border:1px solid #ccc;padding:10px;margin:10px 0;border-radius:8px;background:#e6f7ff;}
-.product-preview{display:inline-block;width:180px;text-align:center;margin:10px;cursor:pointer;border-radius:8px;background:#fff;padding:10px;box-shadow:0 2px 5px rgba(0,0,0,0.1);transition:0.2s;}
-.product-preview:hover{transform:translateY(-5px);box-shadow:0 5px 15px rgba(0,0,0,0.2);}
-.product-preview img{width:150px;height:150px;object-fit:cover;border-radius:5px;}
-.modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);justify-content:center;align-items:center;}
-.modal-content{background:#fff;padding:20px;border-radius:10px;width:90%;max-width:600px;text-align:left;position:relative;}
-.close{position:absolute;top:10px;right:15px;cursor:pointer;font-size:25px;color:#dc3545;}
-#reviews{border-top:1px solid #ccc;margin-top:10px;padding-top:10px;}
-textarea{width:100%;margin-top:5px;border:1px solid #28a745;border-radius:5px;}
-</style>
-</head>
-<body>
+body{margin:0;font-family:Arial;background:#f4f8fb;}
 
-<h1 style="color:#007bff;">Advanced E-Commerce Store Generator</h1>
-
-<h2>Store Settings</h2>
-<label>Store Name:</label>
-<input id="storeName" placeholder="My Online Store">
-<label>Store Description:</label>
-<input id="storeDesc" placeholder="Description of your store">
-<label>Seller Name:</label>
-<input id="sellerName" placeholder="Seller Name">
-<label>Seller Email:</label>
-<input id="sellerEmail" placeholder="Seller Email">
-<label>Upload Logo (optional):</label>
-<input type="file" id="logoInput" accept="image/*">
-<label>Theme:</label>
-<select id="themeSelect">
-  <option value="light">Light</option>
-  <option value="dark">Dark</option>
-</select>
-
-<h2>Products</h2>
-<div id="productsContainer"></div>
-<button onclick="addProduct()">Add Product</button>
-
-<h2>Generate Store</h2>
-<button onclick="generateWebsite()">Generate Website</button>
-
-<script>
-let products = [];
-let logoBase64 = '';
-
-document.getElementById('logoInput').addEventListener('change', function(e){
-    const file = e.target.files[0];
-    if(!file) return;
-    const reader = new FileReader();
-    reader.onload = function(){ logoBase64 = reader.result.split(',')[1]; alert("Logo uploaded!"); };
-    reader.readAsDataURL(file);
-});
-
-function addProduct(){
-    const container = document.getElementById('productsContainer');
-    const index = products.length;
-    const div = document.createElement('div');
-    div.className = 'product-generator';
-    div.innerHTML = `
-      <label>Product Name:</label>
-      <input id="productName${index}" placeholder="Product Name">
-      <label>Price:</label>
-      <input id="productPrice${index}" placeholder="Price">
-      <label>Upload Main Image:</label>
-      <input type="file" id="productImage${index}">
-      <label>Extra Images (optional, comma separated URLs):</label>
-      <input id="productExtraImages${index}" placeholder="Extra Images">
-      <label>Category:</label>
-      <input id="productCategory${index}" placeholder="Category">
-      <label>Description:</label>
-      <textarea id="productDesc${index}" placeholder="Description"></textarea>
-      <label>Enable Reviews:</label>
-      <select id="productReviewsEnable${index}">
-        <option value="true">Yes</option>
-        <option value="false">No</option>
-      </select>
-    `;
-    container.appendChild(div);
-    products.push({});
+/* NAVBAR */
+nav{
+ display:flex;
+ justify-content:space-between;
+ padding:15px;
+ background:#007bff;
+ color:white;
+}
+nav a{
+ color:white;
+ margin:10px;
+ text-decoration:none;
+ font-weight:bold;
 }
 
-async function generateWebsite(){
-    const storeName = document.getElementById('storeName').value || "My Online Store";
-    const storeDesc = document.getElementById('storeDesc').value || "Welcome!";
-    const sellerName = document.getElementById('sellerName').value || "Seller Name";
-    const sellerEmail = document.getElementById('sellerEmail').value || "seller@example.com";
-    const theme = document.getElementById('themeSelect').value;
+/* HERO */
+.hero{
+ text-align:center;
+ padding:60px;
+ background:linear-gradient(to right,#007bff,#28a745);
+ color:white;
+}
 
-    let productHTML = '';
-    let productDataJS = [];
+/* CONTAINER */
+.container{
+ padding:20px;
+ max-width:900px;
+ margin:auto;
+ line-height:1.6;
+}
 
-    for(let i=0;i<products.length;i++){
-        const name = document.getElementById(`productName${i}`).value || `Product ${i+1}`;
-        const price = document.getElementById(`productPrice${i}`).value || "0";
+/* PRODUCTS */
+.products{
+ display:flex;
+ flex-wrap:wrap;
+ justify-content:center;
+}
+.product{
+ background:white;
+ border-radius:10px;
+ padding:15px;
+ margin:10px;
+ width:200px;
+ text-align:center;
+ box-shadow:0 2px 10px rgba(0,0,0,0.1);
+}
+.product img{
+ width:100%;
+ height:150px;
+ object-fit:cover;
+ border-radius:5px;
+}
 
-        // Convert uploaded main image to base64
-        const fileInput = document.getElementById(`productImage${i}`);
-        let mainImage = "https://via.placeholder.com/150"; // fallback
-        if(fileInput.files[0]){
-            mainImage = await new Promise(res=>{
-                const reader = new FileReader();
-                reader.onload = () => res(reader.result);
-                reader.readAsDataURL(fileInput.files[0]);
-            });
-        }
+/* FORM */
+input, button{
+ width:100%;
+ padding:10px;
+ margin:5px 0;
+ border-radius:5px;
+ border:1px solid #ccc;
+}
+button{
+ background:#28a745;
+ color:white;
+ border:none;
+ cursor:pointer;
+}
+button:hover{
+ background:#1e7e34;
+}
 
-        const extraImages = document.getElementById(`productExtraImages${i}`).value.split(',').map(s=>s.trim()).filter(s=>s);
-        const category = document.getElementById(`productCategory${i}`).value || "General";
-        const desc = document.getElementById(`productDesc${i}`).value || "";
-        const reviewsEnable = document.getElementById(`productReviewsEnable${i}`).value === 'true';
-
-        productHTML += `<div class="product-preview" onclick="openProduct(${i})">
-            <img src="${mainImage}">
-            <h3>${name}</h3>
-            <p style="color:#28a745;">$${price}</p>
-        </div>`;
-
-        productDataJS.push({name, price, mainImage, extraImages, category, desc, reviewsEnable, reviews:[]});
-    }
-
-    const htmlContent = `
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>${storeName}</title>
-<style>
-body{font-family:Arial;padding:20px;text-align:center;background:${theme==='dark'?'#222':'#f0f8ff'};color:${theme==='dark'?'#eee':'#333'};}
-.product-preview{border:1px solid #ccc;padding:10px;margin:10px;display:inline-block;width:180px;cursor:pointer;border-radius:8px;background:#fff;box-shadow:0 2px 5px rgba(0,0,0,0.1);transition:0.2s;}
-.product-preview:hover{transform:translateY(-5px);box-shadow:0 5px 15px rgba(0,0,0,0.2);}
-.product-preview img{width:150px;height:150px;object-fit:cover;border-radius:5px;}
-.modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);justify-content:center;align-items:center;}
-.modal-content{background:#fff;padding:20px;border-radius:10px;width:90%;max-width:600px;text-align:left;position:relative;}
-.close{position:absolute;top:10px;right:15px;cursor:pointer;font-size:25px;color:#dc3545;}
-#reviews{border-top:1px solid #ccc;margin-top:10px;padding-top:10px;}
-button{padding:8px 15px;margin-top:10px;background:#28a745;color:#fff;border:none;cursor:pointer;border-radius:5px;transition:0.3s;}
-button:hover{background:#1e7e34;}
-textarea{width:100%;margin-top:5px;border:1px solid #28a745;border-radius:5px;}
+/* FOOTER */
+footer{
+ background:#222;
+ color:white;
+ text-align:center;
+ padding:20px;
+ margin-top:20px;
+}
 </style>
 </head>
-<body>
-${logoBase64?`<img id="logo" src="data:image/png;base64,${logoBase64}" style="margin-bottom:20px;width:100px;">`:''}
-<h1 style="color:#007bff;">${storeName}</h1>
-<p>${storeDesc}</p>
-<div id="productsContainer">${productHTML}</div>
 
-<div id="productModal" class="modal">
-<div class="modal-content">
-<span class="close" onclick="closeModal()">&times;</span>
-<h2 id="modalName"></h2>
-<img id="modalImage" style="width:100%;max-height:250px;object-fit:cover;border-radius:5px;">
-<p id="modalPrice" style="color:#28a745;"></p>
-<p id="modalDesc"></p>
-<p><strong>Category:</strong> <span id="modalCategory"></span></p>
-<p><strong>Seller:</strong> ${sellerName} (${sellerEmail})</p>
-<div id="reviews"><strong>Reviews:</strong><div id="reviewsList"></div></div>
-<textarea id="newReview" placeholder="Add your review here"></textarea>
-<button id="buyBtn">Buy</button>
-<button onclick="addReview()">Add Review</button>
+<body>
+
+<!-- NAVBAR -->
+<nav>
+<div><b>Store Producer</b></div>
+<div>
+<a href="#home">Home</a>
+<a href="#about">About</a>
+<a href="#contact">Contact</a>
+<a href="#privacy">Privacy</a>
+</div>
+</nav>
+
+<!-- HERO -->
+<section class="hero" id="home">
+<h1>Create Your Own E-Commerce Website</h1>
+<p>Build, customize and download your online store easily.</p>
+</section>
+
+<!-- CONTENT -->
+<div class="container">
+
+<h2>About Platform</h2>
+<p>
+Store Producer helps users create simple e-commerce websites without coding.
+It is designed for students and beginners to learn web development and build projects.
+</p>
+
+<h2>Features</h2>
+<p>
+Create product listings, design your store, and generate your own website instantly.
+This platform is simple, fast, and easy to use.
+</p>
+
+<h2>Sample Products</h2>
+<div class="products">
+<div class="product">
+<img src="https://via.placeholder.com/200">
+<h3>Shoes</h3>
+<p>Comfortable footwear.</p>
+</div>
+
+<div class="product">
+<img src="https://via.placeholder.com/200">
+<h3>Watch</h3>
+<p>Elegant design.</p>
+</div>
+
+<div class="product">
+<img src="https://via.placeholder.com/200">
+<h3>Headphones</h3>
+<p>High quality sound.</p>
 </div>
 </div>
 
+</div>
+
+<!-- WEBSITE GENERATOR -->
+<div class="container">
+<h2>Create Your Own Website</h2>
+
+<input id="storeName" placeholder="Enter Store Name">
+<input id="productName" placeholder="Product Name">
+<input id="productPrice" placeholder="Price">
+<input id="productImage" placeholder="Image URL">
+
+<button onclick="generateSite()">Generate Website</button>
+</div>
+
+<!-- ABOUT -->
+<div class="container" id="about">
+<h2>About Us</h2>
+<p>
+This project is created to help beginners learn how websites work and how to build their own online store.
+</p>
+</div>
+
+<!-- CONTACT -->
+<div class="container" id="contact">
+<h2>Contact</h2>
+<p>Email: storeproducer@gmail.com</p>
+</div>
+
+<!-- PRIVACY -->
+<div class="container" id="privacy">
+<h2>Privacy Policy</h2>
+<p>
+We respect user privacy and do not collect personal data. Third-party ads may be used in the future.
+</p>
+</div>
+
+<!-- FOOTER -->
+<footer>
+<p>© 2026 Store Producer | All Rights Reserved</p>
+</footer>
+
+<!-- SCRIPT -->
 <script>
-let products = ${JSON.stringify(productDataJS)};
-let currentProductIndex = null;
+function generateSite(){
+ let name=document.getElementById("storeName").value || "My Store";
+ let product=document.getElementById("productName").value || "Product";
+ let price=document.getElementById("productPrice").value || "0";
+ let image=document.getElementById("productImage").value || "https://via.placeholder.com/150";
 
-function openProduct(index){
-    currentProductIndex=index;
-    const product=products[index];
-    document.getElementById('modalName').innerText=product.name;
-    document.getElementById('modalImage').src=product.mainImage;
-    document.getElementById('modalPrice').innerText='Price: $'+product.price;
-    document.getElementById('modalDesc').innerText=product.desc;
-    document.getElementById('modalCategory').innerText=product.category;
-    updateReviews();
-    document.getElementById('productModal').style.display='flex';
-    document.getElementById('buyBtn').onclick=function(){
-        const buyer=prompt("Enter your name:");
-        const email=prompt("Enter your email:");
-        if(buyer && email){
-            alert('Thank you '+buyer+'! You bought '+product.name+' for $'+product.price+'\\nSeller will contact you at ${sellerEmail}');
-        }
-    };
-    document.getElementById('newReview').style.display=product.reviewsEnable?'block':'none';
-}
+ let html=`
+ <!DOCTYPE html>
+ <html>
+ <head>
+ <title>${name}</title>
+ </head>
+ <body style="font-family:Arial;text-align:center;">
+ <h1>${name}</h1>
+ <img src="${image}" width="200"><br>
+ <h2>${product}</h2>
+ <p>Price: $${price}</p>
+ </body>
+ </html>
+ `;
 
-function closeModal(){document.getElementById('productModal').style.display='none';}
-
-function updateReviews(){
-    const product=products[currentProductIndex];
-    const reviewsDiv=document.getElementById('reviewsList');
-    reviewsDiv.innerHTML=product.reviews.length?product.reviews.map(r=>'- '+r).join('<br>'):'No reviews yet.';
-}
-
-function addReview(){
-    const product=products[currentProductIndex];
-    if(!product.reviewsEnable){alert('Reviews disabled for this product');return;}
-    const reviewText=document.getElementById('newReview').value.trim();
-    if(!reviewText){alert('Enter a review');return;}
-    product.reviews.push(reviewText);
-    document.getElementById('newReview').value='';
-    updateReviews();
+ let blob=new Blob([html],{type:"text/html"});
+ let link=document.createElement("a");
+ link.href=URL.createObjectURL(blob);
+ link.download="store.html";
+ link.click();
 }
 </script>
+
 </body>
 </html>
