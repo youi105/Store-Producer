@@ -8,14 +8,27 @@
 <style>
 body{margin:0;font-family:Arial;background:#f4f8fb;}
 
+/* NAVBAR */
 nav{
  display:flex;
  justify-content:space-between;
  padding:15px;
  background:#007bff;
  color:white;
+ align-items:center;
 }
 
+nav button{
+ background:white;
+ color:#007bff;
+ border:none;
+ padding:8px 12px;
+ border-radius:5px;
+ font-weight:bold;
+ cursor:pointer;
+}
+
+/* HERO */
 .hero{
  text-align:center;
  padding:60px;
@@ -23,12 +36,14 @@ nav{
  color:white;
 }
 
+/* CONTAINER */
 .container{
  padding:20px;
  max-width:900px;
  margin:auto;
 }
 
+/* FORM */
 input, button{
  width:100%;
  padding:10px;
@@ -44,29 +59,37 @@ button{
  cursor:pointer;
 }
 
+button:hover{
+ background:#1e7e34;
+}
+
+/* FOOTER */
 footer{
  background:#222;
  color:white;
  text-align:center;
  padding:20px;
+ margin-top:20px;
 }
 </style>
 </head>
 
 <body>
 
+<!-- NAVBAR -->
 <nav>
 <div><b>Store Producer</b></div>
 <button onclick="googleLogin()">Login with Google</button>
 </nav>
 
+<!-- HERO -->
 <div class="hero">
 <h1>Create Your E-Commerce Website</h1>
 <p>Build and save your store online</p>
 </div>
 
+<!-- GENERATOR -->
 <div class="container">
-
 <h2>Create Your Store</h2>
 
 <input id="storeName" placeholder="Store Name">
@@ -75,9 +98,9 @@ footer{
 <input id="productImage" placeholder="Image URL">
 
 <button onclick="saveStore()">Save Store Online</button>
-
 </div>
 
+<!-- FOOTER -->
 <footer>
 <p>© 2026 Store Producer</p>
 </footer>
